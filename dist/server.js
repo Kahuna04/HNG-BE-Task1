@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 function getLocationByIP(ip) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const response = yield axios_1.default.get(`http://ipapi.co/${ip}/city/`);
+            const response = yield axios_1.default.get(`http://ipapi.co/${ip}/json/`);
             console.log(response.data);
             if (response.data.error) {
                 console.error("ipapi error:", response.data.error);

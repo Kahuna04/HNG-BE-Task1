@@ -25,7 +25,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Function to get location by IP
 async function getLocationByIP(ip: string): Promise<string> {
   try {
-      const response = await axios.get(`http://ipapi.co/${ip}/city/`);
+      const response = await axios.get(`http://ipapi.co/${ip}/json/`);
       console.log(response.data);
       if (response.data.error) {
           console.error("ipapi error:", response.data.error);
