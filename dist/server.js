@@ -16,7 +16,6 @@ const express_1 = __importDefault(require("express"));
 const axios_1 = __importDefault(require("axios"));
 const app = (0, express_1.default)();
 const port = 3000;
-const GEOAPIFY_API_KEY = "a34cac8d5fa846fc9e5636ee4d83afb1";
 app.use((req, res, next) => {
     const forwardedIps = req.headers['x-forwarded-for'].split(',');
     req.clientIp = forwardedIps[0].trim();
@@ -26,8 +25,14 @@ app.use((req, res, next) => {
 function getLocationByIP(ip) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const response = yield axios_1.default.get(`https://api.geoapify.com/v1/ipinfo?&apiKey=${GEOAPIFY_API_KEY}`);
-            return response.data.city;
+            const response = yield axios_1.default.get(`http://ipapi.co/${ip}/city/`);
+            console.log(response.data);
+            if (response.data.error) {
+                console.error("ipapi error:", response.data.error);
+                return "Unknown";
+            }
+            // Assuming the city is directly under response.data.city, adjust based on actual response structure
+            return response.data.city || "Unknown";
         }
         catch (error) {
             console.error("Error fetching location:", error);
@@ -38,8 +43,8 @@ function getLocationByIP(ip) {
 app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(req.query);
     const visitorName = req.query.visitor_name || 'Guest';
-    const clientIp = req.clientIp || 'unknown';
-    let location = "Lagos"; // Default location
+    const clientIp = req.clientIp || "unknown";
+    let location = "Unknown"; // Default location
     try {
         location = yield getLocationByIP(clientIp);
     }
