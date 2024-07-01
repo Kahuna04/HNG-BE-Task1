@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 function getLocationByIP(ip) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const response = yield axios_1.default.get(`https://api.geoapify.com/v1/geocode/ipInfo?apiKey=${GEOAPIFY_API_KEY}&ip=${ip}`);
+            const response = yield axios_1.default.get(`https://api.geoapify.com/v1/ipinfo?&apiKey=${GEOAPIFY_API_KEY}`);
             return response.data.city;
         }
         catch (error) {

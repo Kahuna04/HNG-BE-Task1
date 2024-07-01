@@ -26,7 +26,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Function to get location by IP
 async function getLocationByIP(ip: string): Promise<string> {
   try {
-      const response = await axios.get(`https://api.geoapify.com/v1/geocode/ipInfo?apiKey=${GEOAPIFY_API_KEY}&ip=${ip}`);
+      const response = await axios.get(`https://api.geoapify.com/v1/ipinfo?&apiKey=${GEOAPIFY_API_KEY}`);
       return response.data.city; 
   } catch (error) {
       console.error("Error fetching location:", error);
