@@ -18,7 +18,8 @@ const app = (0, express_1.default)();
 const port = 3000;
 const GEOAPIFY_API_KEY = "a34cac8d5fa846fc9e5636ee4d83afb1";
 app.use((req, res, next) => {
-    req.clientIp = req.headers['x-forwarded-for'] || req.ip;
+    const forwardedIps = req.headers['x-forwarded-for'].split(',');
+    req.clientIp = forwardedIps[0].trim();
     next();
 });
 // Function to get location by IP
@@ -35,7 +36,8 @@ function getLocationByIP(ip) {
     });
 }
 app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const visitorName = req.query.visitor_Name || 'Guest';
+    console.log(req.query);
+    const visitorName = req.query.visitor_name || 'Guest';
     const clientIp = req.clientIp || 'unknown';
     let location = "Lagos"; // Default location
     try {
