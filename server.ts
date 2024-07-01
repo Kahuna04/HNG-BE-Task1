@@ -18,7 +18,8 @@ declare global {
 }
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  req.clientIp = (req.headers['x-forwarded-for'] as string) || req.ip;
+  const forwardedIps = (req.headers['x-forwarded-for'] as string).split(',');
+  req.clientIp = forwardedIps[0].trim(); 
   next();
 });
 
@@ -34,6 +35,7 @@ async function getLocationByIP(ip: string): Promise<string> {
 }
 
 app.get('/api/hello', async (req: Request, res: Response) => {
+  console.log(req.query);
   const visitorName = req.query.visitor_name as string || 'Guest';
   const clientIp = req.clientIp || 'unknown';
   let location = "Lagos"; // Default location
