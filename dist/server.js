@@ -16,7 +16,7 @@ const express_1 = __importDefault(require("express"));
 const axios_1 = __importDefault(require("axios"));
 const app = (0, express_1.default)();
 const port = 3000;
-const weatherAPIKey = process.env.OPENWEATHERMAP_API_KEY;
+const weatherAPIKey = process.env.WEATHERAPI_KEY;
 app.use((req, res, next) => {
     const forwardedIps = req.headers['x-forwarded-for'].split(',');
     req.clientIp = forwardedIps[0].trim();
@@ -43,37 +43,23 @@ app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     console.log(req.query);
     const visitorName = req.query.visitor_name || 'Guest';
     const clientIp = req.clientIp || "unknown";
-    let lat = 0; // Default latitude
-    let lon = 0; // Default longitude
     let location = "Unknown"; // Default location
     try {
         const locationData = yield getLocationByIP(clientIp);
         location = locationData.city;
-        lat = locationData.lat;
-        lon = locationData.lon;
     }
     catch (error) {
         console.error("Failed to get location:", error);
     }
     let temperature = "Unknown";
     try {
-        const weatherResponse = yield axios_1.default.get(`http://api.openweathermap.org/data/3.0/onecall`, {
-            params: {
-                lat: lat,
-                lon: lon,
-                appid: weatherAPIKey,
-                units: 'metric'
-            }
-        });
-        console.log("Weather API response:", weatherResponse.data);
-        if (weatherResponse.data && weatherResponse.data.current) {
-            temperature = weatherResponse.data.current.temp;
-        }
+        const weatherResponse = yield axios_1.default.get(`http://api.weatherapi.com/v1/current.json?key=${weatherAPIKey}=${location}`);
+        temperature = weatherResponse.data.current.temp_c;
     }
     catch (weatherError) {
         console.error("Failed to get weather:", weatherError);
     }
-    const greeting = `Hello, ${visitorName}! The temperature is ${temperature} degrees Celsius in ${location}.`;
+    const greeting = `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${location}.`;
     res.json({
         client_Ip: clientIp,
         location: location,

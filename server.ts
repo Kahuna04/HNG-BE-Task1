@@ -1,10 +1,14 @@
 import express from 'express';
-import { Request, Response, NextFunction } from 'express';
+import { Request, 
+         Response, 
+         NextFunction 
+       } from 'express';
 import axios from 'axios';
 
 const app = express();
 const port = 3000;
-const weatherAPIKey = process.env.OPENWEATHERMAP_API_KEY;
+const weatherAPIKey = process.env.WEATHERAPI_KEY;
+
 
 declare global {
   namespace Express {
@@ -20,18 +24,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+
 // Function to get location by IP
 async function getLocationByIP(ip: string): Promise<{city: string, lat: number, lon: number}> {
   try {
-    const response = await axios.get(`https://ipapi.co/${ip}/json/`);
-    if (response.data.error) {
-      console.error("ipapi error:", response.data.error);
-      return {city: "Unknown", lat: 0, lon: 0};
-    }
-    return {city: response.data.city, lat: response.data.latitude, lon: response.data.longitude};
+      const response = await axios.get(`https://ipapi.co/${ip}/json/`);
+      if (response.data.error) {
+          console.error("ipapi error:", response.data.error);
+          return {city: "Unknown", lat: 0, lon: 0};
+      }
+      return {city: response.data.city, lat: response.data.latitude, lon: response.data.longitude};
   } catch (error) {
-    console.error("Error fetching location:", error);
-    return {city: "Unknown", lat: 0, lon: 0};
+      console.error("Error fetching location:", error);
+      return {city: "Unknown", lat: 0, lon: 0};
   }
 }
 
@@ -40,38 +45,22 @@ app.get('/api/hello', async (req: Request, res: Response) => {
   const visitorName = req.query.visitor_name as string || 'Guest';
   const clientIp = req.clientIp || "unknown"; 
 
-  let lat = 0; // Default latitude
-  let lon = 0; // Default longitude
   let location = "Unknown"; // Default location
   try {
-    const locationData = await getLocationByIP(clientIp);
-    location = locationData.city;
-    lat = locationData.lat;
-    lon = locationData.lon;
+      const locationData = await getLocationByIP(clientIp);
+      location = locationData.city;
   } catch (error) {
-    console.error("Failed to get location:", error);
+      console.error("Failed to get location:", error);
   }
 
   let temperature = "Unknown";
   try {
-    const weatherResponse = await axios.get(`http://api.openweathermap.org/data/3.0/onecall`, {
-      params: {
-        lat: lat,
-        lon: lon,
-        appid: weatherAPIKey,
-        units: 'metric'
-      }
-    });
-
-    console.log("Weather API response:", weatherResponse.data);
-    if (weatherResponse.data && weatherResponse.data.current) {
-      temperature = weatherResponse.data.current.temp;
-    }
-  } catch (weatherError) {
+      const weatherResponse = await axios.get(`http://api.weatherapi.com/v1/current.json?key=${weatherAPIKey}=${location}`);
+      temperature = weatherResponse.data.current.temp_c;
+      } catch (weatherError) {
     console.error("Failed to get weather:", weatherError);
   }
-
-  const greeting = `Hello, ${visitorName}! The temperature is ${temperature} degrees Celsius in ${location}.`;
+  const greeting = `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${location}.`;
 
   res.json({
     client_Ip: clientIp,
