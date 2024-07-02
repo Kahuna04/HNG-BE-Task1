@@ -26,18 +26,16 @@ app.use((req, res, next) => {
 function getLocationByIP(ip) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const response = yield axios_1.default.get(`http://ipapi.co/${ip}/json/`);
-            console.log(response.data);
+            const response = yield axios_1.default.get(`https://ipapi.co/${ip}/json/`);
             if (response.data.error) {
                 console.error("ipapi error:", response.data.error);
-                return "Unknown";
+                return { city: "Unknown", lat: 0, lon: 0 };
             }
-            // Assuming the city is directly under response.data.city, adjust based on actual response structure
-            return response.data.city || "Unknown";
+            return { city: response.data.city, lat: response.data.latitude, lon: response.data.longitude };
         }
         catch (error) {
             console.error("Error fetching location:", error);
-            return "Unknown";
+            return { city: "Unknown", lat: 0, lon: 0 };
         }
     });
 }
@@ -45,17 +43,24 @@ app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     console.log(req.query);
     const visitorName = req.query.visitor_name || 'Guest';
     const clientIp = req.clientIp || "unknown";
+    let lat = 0; // Default latitude
+    let long = 0; // Default longitude
     let location = "Unknown"; // Default location
     try {
-        location = yield getLocationByIP(clientIp);
+        const locationData = yield getLocationByIP(clientIp);
+        location = locationData.city;
+        lat = locationData.lat;
+        long = locationData.lon;
     }
     catch (error) {
         console.error("Failed to get location:", error);
     }
     let temperature = "Unknown";
     try {
-        const weatherResponse = yield axios_1.default.get(`http://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${weatherAPIKey}&units=metric`); // Use 'units=metric' for Celsius
-        temperature = Math.round(weatherResponse.data.main.temp).toString(); // Temperature in Celsius
+        const weatherResponse = yield axios_1.default.get(`http://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${long}&appid=${weatherAPIKey}&units=metric`);
+        if (weatherResponse.data && weatherResponse.data.main) {
+            temperature = Math.round(weatherResponse.data.main.temp).toString(); // Temperature in Celsius
+        }
     }
     catch (weatherError) {
         console.error("Failed to get weather:", weatherError);
