@@ -16,6 +16,7 @@ const express_1 = __importDefault(require("express"));
 const axios_1 = __importDefault(require("axios"));
 const app = (0, express_1.default)();
 const port = 3000;
+const weatherAPIKey = process.env.OPENWEATHERMAP_API_KEY;
 app.use((req, res, next) => {
     const forwardedIps = req.headers['x-forwarded-for'].split(',');
     req.clientIp = forwardedIps[0].trim();
@@ -51,7 +52,14 @@ app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     catch (error) {
         console.error("Failed to get location:", error);
     }
-    const temperature = 23; // Fixed temperature value
+    let temperature = "Unknown";
+    try {
+        const weatherResponse = yield axios_1.default.get(`http://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${weatherAPIKey}&units=metric`); // Use 'units=metric' for Celsius
+        temperature = Math.round(weatherResponse.data.main.temp).toString(); // Temperature in Celsius
+    }
+    catch (weatherError) {
+        console.error("Failed to get weather:", weatherError);
+    }
     const greeting = `Hello, ${visitorName}. The temperature is ${temperature} degrees Celsius in ${location}.`;
     res.json({
         client_Ip: clientIp,
