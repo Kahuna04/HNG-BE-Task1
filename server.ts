@@ -4,6 +4,10 @@ import { Request,
          NextFunction 
        } from 'express';
 import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 
 const app = express();
 const port = 3000;
@@ -26,17 +30,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 
 // Function to get location by IP
-async function getLocationByIP(ip: string): Promise<{city: string, lat: number, lon: number}> {
+async function getLocationByIP(ip: string): Promise<{city: string}> {
   try {
       const response = await axios.get(`https://ipapi.co/${ip}/json/`);
       if (response.data.error) {
           console.error("ipapi error:", response.data.error);
-          return {city: "Unknown", lat: 0, lon: 0};
+          return {city: "Unknown"};
       }
-      return {city: response.data.city, lat: response.data.latitude, lon: response.data.longitude};
+      return {city: response.data.city};
   } catch (error) {
       console.error("Error fetching location:", error);
-      return {city: "Unknown", lat: 0, lon: 0};
+      return {city: "Unknown"};
   }
 }
 
@@ -53,12 +57,17 @@ app.get('/api/hello', async (req: Request, res: Response) => {
       console.error("Failed to get location:", error);
   }
 
-  let temperature = "";
+  let temperature = 'Unknown';
   try {
-      const weatherResponse = await axios.get(`http://api.weatherapi.com/v1/current.json?key=1166e0a7554e4bf78d0110530240207=${location}`);
-      temperature = weatherResponse.data.current.temp_c;
-      } catch (weatherError) {
-    console.error("Failed to get weather:", weatherError);
+    const weatherResponse = await axios.get(`http://api.weatherapi.com/v1/current.json`, {
+      params: {
+        key: weatherAPIKey,
+        q: location,
+      },
+    });
+    temperature = weatherResponse.data.current.temp_c;
+  } catch (weatherError) {
+    console.error('Failed to get weather:', weatherError);
   }
   const greeting = `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${location}.`;
 

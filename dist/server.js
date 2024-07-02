@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const axios_1 = __importDefault(require("axios"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = 3000;
 const weatherAPIKey = process.env.WEATHERAPI_KEY;
@@ -29,13 +31,13 @@ function getLocationByIP(ip) {
             const response = yield axios_1.default.get(`https://ipapi.co/${ip}/json/`);
             if (response.data.error) {
                 console.error("ipapi error:", response.data.error);
-                return { city: "Unknown", lat: 0, lon: 0 };
+                return { city: "Unknown" };
             }
-            return { city: response.data.city, lat: response.data.latitude, lon: response.data.longitude };
+            return { city: response.data.city };
         }
         catch (error) {
             console.error("Error fetching location:", error);
-            return { city: "Unknown", lat: 0, lon: 0 };
+            return { city: "Unknown" };
         }
     });
 }
@@ -51,13 +53,18 @@ app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     catch (error) {
         console.error("Failed to get location:", error);
     }
-    let temperature = "";
+    let temperature = 'Unknown';
     try {
-        const weatherResponse = yield axios_1.default.get(`http://api.weatherapi.com/v1/current.json?key=1166e0a7554e4bf78d0110530240207=${location}`);
+        const weatherResponse = yield axios_1.default.get(`http://api.weatherapi.com/v1/current.json`, {
+            params: {
+                key: weatherAPIKey,
+                q: location,
+            },
+        });
         temperature = weatherResponse.data.current.temp_c;
     }
     catch (weatherError) {
-        console.error("Failed to get weather:", weatherError);
+        console.error('Failed to get weather:', weatherError);
     }
     const greeting = `Hello, ${visitorName}!, the temperature is ${temperature} degrees Celsius in ${location}.`;
     res.json({
