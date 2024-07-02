@@ -51,9 +51,9 @@ app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     catch (error) {
         console.error("Failed to get location:", error);
     }
-    let temperature = "Unknown";
+    let temperature = "";
     try {
-        const weatherResponse = yield axios_1.default.get(`http://api.weatherapi.com/v1/current.json?key=${weatherAPIKey}=${location}`);
+        const weatherResponse = yield axios_1.default.get(`http://api.weatherapi.com/v1/current.json?key=1166e0a7554e4bf78d0110530240207=${location}`);
         temperature = weatherResponse.data.current.temp_c;
     }
     catch (weatherError) {
