@@ -58,9 +58,7 @@ app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     let temperature = "Unknown";
     try {
         const weatherResponse = yield axios_1.default.get(`http://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${long}&appid=${weatherAPIKey}&units=metric`);
-        if (weatherResponse.data && weatherResponse.data.main) {
-            temperature = Math.round(weatherResponse.data.main.temp).toString(); // Temperature in Celsius
-        }
+        temperature = weatherResponse.data.current.temp;
     }
     catch (weatherError) {
         console.error("Failed to get weather:", weatherError);

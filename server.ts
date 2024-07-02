@@ -60,10 +60,8 @@ app.get('/api/hello', async (req: Request, res: Response) => {
   let temperature = "Unknown";
   try {
       const weatherResponse = await axios.get(`http://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${long}&appid=${weatherAPIKey}&units=metric`);
-      if (weatherResponse.data && weatherResponse.data.main) {
-          temperature = Math.round(weatherResponse.data.main.temp).toString(); // Temperature in Celsius
-      }
-} catch (weatherError) {
+      temperature = weatherResponse.data.current.temp;
+      } catch (weatherError) {
     console.error("Failed to get weather:", weatherError);
   }
   const greeting = `Hello, ${visitorName}. The temperature is ${temperature} degrees Celsius in ${location}.`;
