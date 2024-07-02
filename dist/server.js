@@ -44,26 +44,36 @@ app.get('/api/hello', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const visitorName = req.query.visitor_name || 'Guest';
     const clientIp = req.clientIp || "unknown";
     let lat = 0; // Default latitude
-    let long = 0; // Default longitude
+    let lon = 0; // Default longitude
     let location = "Unknown"; // Default location
     try {
         const locationData = yield getLocationByIP(clientIp);
         location = locationData.city;
         lat = locationData.lat;
-        long = locationData.lon;
+        lon = locationData.lon;
     }
     catch (error) {
         console.error("Failed to get location:", error);
     }
     let temperature = "Unknown";
     try {
-        const weatherResponse = yield axios_1.default.get(`http://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${long}&appid=${weatherAPIKey}&units=metric`);
-        temperature = weatherResponse.data.current.temp;
+        const weatherResponse = yield axios_1.default.get(`http://api.openweathermap.org/data/3.0/onecall`, {
+            params: {
+                lat: lat,
+                lon: lon,
+                appid: weatherAPIKey,
+                units: 'metric'
+            }
+        });
+        console.log("Weather API response:", weatherResponse.data);
+        if (weatherResponse.data && weatherResponse.data.current) {
+            temperature = weatherResponse.data.current.temp;
+        }
     }
     catch (weatherError) {
         console.error("Failed to get weather:", weatherError);
     }
-    const greeting = `Hello, ${visitorName}. The temperature is ${temperature} degrees Celsius in ${location}.`;
+    const greeting = `Hello, ${visitorName}! The temperature is ${temperature} degrees Celsius in ${location}.`;
     res.json({
         client_Ip: clientIp,
         location: location,
