@@ -6,7 +6,7 @@ import { Request,
 import axios from 'axios';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config()
 
 
 const app = express();
@@ -23,7 +23,13 @@ declare global {
 }
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const forwardedIps = (req.headers['x-forwarded-for'] as string).split(',');
+  let forwardedIps;
+  if (req.headers['x-forwarded-for']) {
+    forwardedIps = (req.headers['x-forwarded-for'] as string).split(',');
+  } else {
+    // Fallback to a default IP or handle the case where x-forwarded-for is not available
+    forwardedIps = ['unknown'];
+  }
   req.clientIp = forwardedIps[0].trim(); 
   next();
 });

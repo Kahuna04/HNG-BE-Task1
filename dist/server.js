@@ -20,7 +20,14 @@ const app = (0, express_1.default)();
 const port = 3000;
 const weatherAPIKey = process.env.WEATHERAPI_KEY;
 app.use((req, res, next) => {
-    const forwardedIps = req.headers['x-forwarded-for'].split(',');
+    let forwardedIps;
+    if (req.headers['x-forwarded-for']) {
+        forwardedIps = req.headers['x-forwarded-for'].split(',');
+    }
+    else {
+        // Fallback to a default IP or handle the case where x-forwarded-for is not available
+        forwardedIps = ['unknown'];
+    }
     req.clientIp = forwardedIps[0].trim();
     next();
 });
